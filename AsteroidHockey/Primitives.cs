@@ -32,6 +32,15 @@ namespace AsteroidHockey
         private float m_mass;
         protected BoundingSphere m_collisionSphere;
 
+        public BoundingSphere CollisionSphere
+        {
+            get
+            {
+                return m_collisionSphere;
+            }
+        }
+        
+
         public Vector2 Position
         {
             get

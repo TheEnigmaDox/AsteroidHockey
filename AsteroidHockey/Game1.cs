@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -23,6 +24,9 @@ namespace AsteroidHockey
         Asteroid asteroid;
         BlackHole p1Goal;
         BlackHole p2Goal;
+        PlayerShip p1ship;
+
+        GamePadState pad1_curr;
 
         public Game1()
         {
@@ -65,6 +69,13 @@ namespace AsteroidHockey
 
             p1Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(100, 300), 0.02f);
             p2Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(700, 300), 0.02f);
+            p1ship = new PlayerShip(Content.Load<Texture2D>("Textures/falcon"),
+                Content.Load<Texture2D>("Textures/direction"),
+                Content.Load<Texture2D>("Textures/shield"),
+                p1Goal.Position, 10, Color.Red,
+                0.2f, 0.97f,
+                Content.Load<SoundEffect>("Audio/thrusterFire"),
+                Content.Load<SoundEffect>("Audio/forceField"));
         }
 
         protected override void Update(GameTime gameTime)
@@ -74,10 +85,14 @@ namespace AsteroidHockey
 
             // TODO: Add your update logic here
 
+            pad1_curr = GamePad.GetState(PlayerIndex.One);
+
             asteroid.UpdateMe(gameTime,screenBounds);
 
             p1Goal.UpdateMe(gameTime);
             p2Goal.UpdateMe(gameTime);
+
+            p1ship.UpdateMe(gameTime, pad1_curr);
 
             base.Update(gameTime);
         }
@@ -95,9 +110,22 @@ namespace AsteroidHockey
             p2Goal.DrawMe(_spriteBatch);
             asteroid.DrawMe(_spriteBatch);
 
+            p1ship.DrawMe(_spriteBatch, new Rectangle(0, 0, windowSize.X, windowSize.Y), gameTime);
+
+            if (asteroid.CollisionSphere.Intersects(p1ship.CollisionSphere))
+            {
 #if DEBUG
-    _spriteBatch.DrawString(debugFont, _graphics.PreferredBackBufferWidth + "X" +
-        _graphics.PreferredBackBufferHeight + "\nfps" + (int)(1 / gameTime.ElapsedGameTime.TotalSeconds) + "ish",
+                Trace.WriteLine("Asteriod/P1 collision at : " + gameTime.TotalGameTime + "!");
+#endif
+                p1ship.ShieldsUp();
+            }
+
+#if DEBUG
+    _spriteBatch.DrawString(debugFont, 
+        _graphics.PreferredBackBufferWidth + "X" + _graphics.PreferredBackBufferHeight
+        + "\nfps" + (int)(1 / gameTime.ElapsedGameTime.TotalSeconds) + "ish"
+        + "\npad1 : "
+        + (pad1_curr.IsConnected ? " " + pad1_curr.ThumbSticks.Left + pad1_curr.Triggers : "D/C"),
         Vector2.One, Color.White);
 #endif
 

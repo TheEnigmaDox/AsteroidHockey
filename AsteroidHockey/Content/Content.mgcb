@@ -13,6 +13,18 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Audio/forceField.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/forceField.wav
+
+#begin Audio/thrusterFire.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/thrusterFire.wav
+
 #begin Fonts/Arial07.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
