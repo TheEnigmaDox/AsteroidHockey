@@ -25,8 +25,10 @@ namespace AsteroidHockey
         BlackHole p1Goal;
         BlackHole p2Goal;
         PlayerShip p1ship;
+        PlayerShip p2ship;
 
         GamePadState pad1_curr;
+        GamePadState pad2_curr;
 
         public Game1()
         {
@@ -65,10 +67,11 @@ namespace AsteroidHockey
             background = new StaticGraphic(Content.Load<Texture2D>("Textures/stars800"), Vector2.Zero);
             asteroid = new Asteroid(Content.Load<Texture2D>("Textures/asteroid"),
                 new Vector2(windowSize.X / 2, windowSize.Y / 2),
-                -0.002f, new Vector2(75, 75), 0);
+                -0.002f, new Vector2(75, 75), 40);
 
             p1Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(100, 300), 0.02f);
             p2Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(700, 300), 0.02f);
+
             p1ship = new PlayerShip(Content.Load<Texture2D>("Textures/falcon"),
                 Content.Load<Texture2D>("Textures/direction"),
                 Content.Load<Texture2D>("Textures/shield"),
@@ -76,6 +79,17 @@ namespace AsteroidHockey
                 0.2f, 0.97f,
                 Content.Load<SoundEffect>("Audio/thrusterFire"),
                 Content.Load<SoundEffect>("Audio/forceField"));
+
+            p2ship = new PlayerShip(Content.Load<Texture2D>("Textures/falcon"),
+                Content.Load<Texture2D>("Textures/direction"),
+                Content.Load<Texture2D>("Textures/shield"),
+                p2Goal.Position,
+                10, Color.Blue,
+                0.2f, 0.97f,
+                Content.Load<SoundEffect>("Audio/thrusterFire"),
+                Content.Load<SoundEffect>("Audio/forceField"));
+
+            p2ship.Rotation = (float)Math.PI;
         }
 
         protected override void Update(GameTime gameTime)
@@ -86,6 +100,7 @@ namespace AsteroidHockey
             // TODO: Add your update logic here
 
             pad1_curr = GamePad.GetState(PlayerIndex.One);
+            pad2_curr = GamePad.GetState(PlayerIndex.Two);
 
             asteroid.UpdateMe(gameTime,screenBounds);
 
@@ -93,6 +108,8 @@ namespace AsteroidHockey
             p2Goal.UpdateMe(gameTime);
 
             p1ship.UpdateMe(gameTime, pad1_curr);
+            p2ship.UpdateMe(gameTime, pad2_curr);
+
 
             if (asteroid.CollisionSphere.Intersects(p1ship.CollisionSphere))
             {
@@ -104,6 +121,31 @@ namespace AsteroidHockey
                     asteroid.Mass, p1ship.Mass);
 
                 p1ship.ShieldsUp();
+            }
+
+            if (asteroid.CollisionSphere.Intersects(p2ship.CollisionSphere))
+            {
+#if DEBUG
+                Trace.WriteLine("Asteroid/P2 collision at : " + gameTime.TotalGameTime + "!");
+#endif 
+                UtilityFunctions.cresponse(asteroid.Position, p2ship.Position,
+                    ref asteroid.Velocity, ref p2ship.Velocity,
+                    asteroid.Mass, p2ship.Mass);
+
+                p2ship.ShieldsUp();
+            }
+
+            if (p1ship.CollisionSphere.Intersects(p2ship.CollisionSphere))
+            {
+#if DEBUG
+                Trace.WriteLine("P1/P2 collision at " + gameTime.TotalGameTime);
+#endif 
+                UtilityFunctions.cresponse(p1ship.Position, p2ship.Position,
+                    ref p1ship.Velocity, ref p2ship.Velocity,
+                    p1ship.Mass, p2ship.Mass);
+
+                p1ship.ShieldsUp();
+                p2ship.ShieldsUp();
             }
 
             base.Update(gameTime);
@@ -123,6 +165,7 @@ namespace AsteroidHockey
             asteroid.DrawMe(_spriteBatch);
 
             p1ship.DrawMe(_spriteBatch, new Rectangle(0, 0, windowSize.X, windowSize.Y), gameTime);
+            p2ship.DrawMe(_spriteBatch, new Rectangle(0, 0, windowSize.X, windowSize.Y), gameTime);
 
 #if DEBUG
     _spriteBatch.DrawString(debugFont, 

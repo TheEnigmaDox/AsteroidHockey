@@ -10,6 +10,8 @@ namespace AsteroidHockey
 {
     class Asteroid : SpaceObject
     {
+        private Vector2 m_maxVelocity = new Vector2(250, 250);
+
         public Asteroid(Texture2D txr, Vector2 pos, float rotSpeed, Vector2 startingSpeed, float mass)
             : base(txr, pos, rotSpeed, startingSpeed, mass)
         { 
@@ -31,6 +33,8 @@ namespace AsteroidHockey
             {
                 Velocity.Y = -Velocity.Y;
             }
+
+            Velocity = Vector2.Clamp(Velocity, -m_maxVelocity, m_maxVelocity);
         }
     }
 
@@ -108,6 +112,20 @@ namespace AsteroidHockey
         SoundEffect m_shieldSFX;
         SoundEffectInstance m_thrusterInstance;
         SoundEffectInstance m_shieldInstance;
+
+        public float Rotation
+        {
+            set
+            {
+                m_rotation = value;
+                m_direction.X = (float)Math.Cos(m_rotation);
+                m_direction.Y = (float)Math.Sin(m_rotation);
+            }
+            get
+            {
+                return m_rotation;
+            }
+        }
 
         public PlayerShip(Texture2D txrImage, Texture2D txrDirection, Texture2D txrShield, Vector2 position, float mass, Color tint,
             float thrust, float inertia, SoundEffect shipThruster, SoundEffect shieldSFX)
@@ -223,7 +241,7 @@ namespace AsteroidHockey
                 sBatch.Draw(m_txrShield,
                     Position,
                     null,
-                    Color.Red * (float)(alpha += (float)(m_shieldRunTime * gt.ElapsedGameTime.TotalSeconds)),
+                    m_tint * (float)(alpha += (float)(m_shieldRunTime * gt.ElapsedGameTime.TotalSeconds)),
                     0,
                     new Vector2(m_collisionSphere.Radius),
                     1.5f,
