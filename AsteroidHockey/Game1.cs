@@ -94,6 +94,18 @@ namespace AsteroidHockey
 
             p1ship.UpdateMe(gameTime, pad1_curr);
 
+            if (asteroid.CollisionSphere.Intersects(p1ship.CollisionSphere))
+            {
+#if DEBUG
+                Trace.WriteLine("Asteriod/P1 collision at : " + gameTime.TotalGameTime + "!");
+#endif
+                UtilityFunctions.cresponse(asteroid.Position, p1ship.Position,
+                    ref asteroid.Velocity, ref p1ship.Velocity,
+                    asteroid.Mass, p1ship.Mass);
+
+                p1ship.ShieldsUp();
+            }
+
             base.Update(gameTime);
         }
 
@@ -111,14 +123,6 @@ namespace AsteroidHockey
             asteroid.DrawMe(_spriteBatch);
 
             p1ship.DrawMe(_spriteBatch, new Rectangle(0, 0, windowSize.X, windowSize.Y), gameTime);
-
-            if (asteroid.CollisionSphere.Intersects(p1ship.CollisionSphere))
-            {
-#if DEBUG
-                Trace.WriteLine("Asteriod/P1 collision at : " + gameTime.TotalGameTime + "!");
-#endif
-                p1ship.ShieldsUp();
-            }
 
 #if DEBUG
     _spriteBatch.DrawString(debugFont, 

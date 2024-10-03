@@ -23,7 +23,7 @@ namespace AsteroidHockey
 
     abstract class SpaceObject : StaticGraphic
     {
-        protected Vector2 m_velocity;
+        public Vector2 Velocity;
 
         protected Vector2 m_centreOfRotation;
         protected float m_rotation;
@@ -40,7 +40,6 @@ namespace AsteroidHockey
             }
         }
         
-
         public Vector2 Position
         {
             get
@@ -54,6 +53,14 @@ namespace AsteroidHockey
             }
         }
 
+        public float Mass
+        {
+            get
+            {
+                return m_mass;
+            }
+        }
+
         public SpaceObject(Texture2D txr, Vector2 pos,
             float rotationSpeed, Vector2 startingSpeed, float mass)
             : base(txr, pos)
@@ -62,7 +69,7 @@ namespace AsteroidHockey
             m_rotationSpeed = rotationSpeed;
             m_centreOfRotation = new Vector2(txr.Width / 2, txr.Height / 2);
 
-            m_velocity = startingSpeed;
+            Velocity = startingSpeed;
 
             m_collisionSphere = new BoundingSphere(new Vector3(m_position, 0), txr.Width / 2);
             m_mass = mass;
@@ -82,7 +89,7 @@ namespace AsteroidHockey
             sBatch.DrawString(Game1.debugFont,
                 this + " at (" + m_position.X.ToString("0.00") + ", " + m_position.Y.ToString("0.00") + ")"
                 + " rot: " + m_rotation.ToString("0.00")
-                + "\nVelocity is: " + m_velocity.ToString()
+                + "\nVelocity is: " + Velocity.ToString()
                 + "\nCollision sphere is: " + m_collisionSphere.Center.X.ToString("0.00") + ","
                 + m_collisionSphere.Center.Y.ToString("0.00"),
                 m_position, Color.White);

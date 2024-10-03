@@ -18,18 +18,18 @@ namespace AsteroidHockey
 
         public void UpdateMe(GameTime gt, Rectangle sBounds)
         {
-            Position += m_velocity * (float)gt.ElapsedGameTime.TotalSeconds;
+            Position += Velocity * (float)gt.ElapsedGameTime.TotalSeconds;
 
             m_rotation = (m_rotation + m_rotationSpeed) % MathHelper.TwoPi;
 
 
             if (Position.X + m_txr.Width / 2 >= sBounds.Width || Position.X - m_txr.Width / 2 <= 0)
             {
-                m_velocity.X = -m_velocity.X;
+                Velocity.X = -Velocity.X;
             }
             if (Position.Y + m_txr.Height / 2 >= sBounds.Height || Position.Y - m_txr.Height / 2 <= 0)
             {
-                m_velocity.Y = -m_velocity.Y;
+                Velocity.Y = -Velocity.Y;
             }
         }
     }
@@ -79,7 +79,7 @@ namespace AsteroidHockey
             sBatch.DrawString(Game1.debugFont,
                 this + " at (" + m_position.X.ToString("0.00") + ", " + m_position.Y.ToString("0.00") + ")"
                 + " rot: " + m_rotation.ToString("0.00")
-                + "\nVelocity is: " + m_velocity.ToString()
+                + "\nVelocity is: " + Velocity.ToString()
                 + "\nCollision sphere is: " + m_collisionSphere.Center.X.ToString("0.00") + ","
                 + m_collisionSphere.Center.Y.ToString("0.00"),
                 m_position, Color.White);
@@ -151,14 +151,14 @@ namespace AsteroidHockey
             }
             else
             {
-                m_velocity += (m_direction * m_thrust) * (pad1.Triggers.Right * 20);
-                m_velocity += (m_direction * -m_thrust) * (pad1.Triggers.Left * 20);
+                Velocity += (m_direction * m_thrust) * (pad1.Triggers.Right * 20);
+                Velocity += (m_direction * -m_thrust) * (pad1.Triggers.Left * 20);
                 m_shieldInstance.Pause();
             }
 
-            Position += m_velocity * (float)gt.ElapsedGameTime.TotalSeconds;
+            Position += Velocity * (float)gt.ElapsedGameTime.TotalSeconds;
 
-            m_velocity *= m_inertia;
+            Velocity *= m_inertia;
             ReduceVelocity();
 
             if(pad1.Triggers.Right == 0 && pad1.Triggers.Left == 0)
@@ -174,7 +174,7 @@ namespace AsteroidHockey
             {
                 m_rotation = 0;
                 Position = new Vector2(100, 300);
-                m_velocity = Vector2.Zero;
+                Velocity = Vector2.Zero;
             }
 
             if (pad1.Buttons.RightShoulder == ButtonState.Pressed)
@@ -191,10 +191,10 @@ namespace AsteroidHockey
 
         private void ReduceVelocity()
         {
-            if (m_velocity.Length() < 2f)
-                m_velocity = Vector2.Zero;
+            if (Velocity.Length() < 2f)
+                Velocity = Vector2.Zero;
 
-            m_velocity = Vector2.Clamp(m_velocity, -m_maxVelocity, m_maxVelocity);
+            Velocity = Vector2.Clamp(Velocity, -m_maxVelocity, m_maxVelocity);
         }
 
         public void DrawMe(SpriteBatch sBatch, Rectangle screenBounds, GameTime gt)
@@ -235,7 +235,7 @@ namespace AsteroidHockey
             sBatch.DrawString(Game1.debugFont,
                 this + " at " + m_position
                 + "\nRot: " + m_rotation
-                + "\nVelocity: " + m_velocity
+                + "\nVelocity: " + Velocity
                 + "\nCollision Sphere: " + m_collisionSphere
                 + "\nDirection: " + m_direction
                 + "\nShields remaining: " + m_shieldRunTime,
