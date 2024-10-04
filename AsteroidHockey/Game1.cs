@@ -30,6 +30,17 @@ namespace AsteroidHockey
         GamePadState pad1_curr;
         GamePadState pad2_curr;
 
+        
+
+        GameState gameState = GameState.Title;
+
+         public enum GameState
+        {
+            Title,
+            Game,
+            GameOver
+        }
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -67,7 +78,7 @@ namespace AsteroidHockey
             background = new StaticGraphic(Content.Load<Texture2D>("Textures/stars800"), Vector2.Zero);
             asteroid = new Asteroid(Content.Load<Texture2D>("Textures/asteroid"),
                 new Vector2(windowSize.X / 2, windowSize.Y / 2),
-                -0.002f, new Vector2(75, 75), 40);
+                -0.002f, new Vector2(75, 75), 20);
 
             p1Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(100, 300), 0.02f);
             p2Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(700, 300), 0.02f);
@@ -84,7 +95,7 @@ namespace AsteroidHockey
                 Content.Load<Texture2D>("Textures/direction"),
                 Content.Load<Texture2D>("Textures/shield"),
                 p2Goal.Position,
-                10, Color.Blue,
+                10, Color.Yellow,
                 0.2f, 0.97f,
                 Content.Load<SoundEffect>("Audio/thrusterFire"),
                 Content.Load<SoundEffect>("Audio/forceField"));
