@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System;
 
 namespace AsteroidHockey
@@ -21,6 +22,40 @@ namespace AsteroidHockey
         }
     }
 
+    class TextRenderer
+    {
+        private SpriteFont m_font;
+        private Vector2 m_position;
+
+        float alpha = 0.75f;
+        float alphaChange = 0.6f;
+
+        public TextRenderer(SpriteFont font, Vector2 position)
+        {
+            m_font = font;
+            m_position = position;
+        }
+
+        public void UpdateMe(GameTime gameTime)
+        {
+            alpha += alphaChange * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (alpha > 0.9f)
+            {
+                alphaChange *= -1;
+            }
+            if (alpha < 0.0f)
+            {
+                alphaChange *= -1;
+            }
+        }
+
+        public void DrawString(SpriteBatch sBatch, string textToDraw)
+        {
+            sBatch.DrawString(m_font, textToDraw, m_position - m_font.MeasureString(textToDraw) / 2, Color.White * alpha);
+        }
+    }
+
     abstract class SpaceObject : StaticGraphic
     {
         public Vector2 Velocity;
@@ -32,11 +67,24 @@ namespace AsteroidHockey
         private float m_mass;
         protected BoundingSphere m_collisionSphere;
 
+        public Texture2D Texture
+        {
+            get
+            {
+                return m_txr;
+            }
+        }
+
         public BoundingSphere CollisionSphere
         {
             get
             {
                 return m_collisionSphere;
+            }
+
+            set
+            {
+                m_collisionSphere = value;
             }
         }
         

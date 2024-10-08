@@ -10,6 +10,21 @@ namespace AsteroidHockey
 {
     class Asteroid : SpaceObject
     {
+        float m_scale = 1;
+
+        public float Scale
+        {
+            get
+            {
+                return m_scale;
+            }
+
+            set
+            {
+                m_scale = value;
+            }
+        }
+
         private Vector2 m_maxVelocity = new Vector2(250, 250);
 
         public Asteroid(Texture2D txr, Vector2 pos, float rotSpeed, Vector2 startingSpeed, float mass)
@@ -29,12 +44,39 @@ namespace AsteroidHockey
             {
                 Velocity.X = -Velocity.X;
             }
-            if (Position.Y + m_txr.Height / 2 >= sBounds.Height || Position.Y - m_txr.Height / 2 <= 0)
+            if (Position.Y + m_txr.Height / 2 >= sBounds.Height || Position.Y - m_txr.Height / 2 <= 75)
             {
                 Velocity.Y = -Velocity.Y;
             }
 
             Velocity = Vector2.Clamp(Velocity, -m_maxVelocity, m_maxVelocity);
+        }
+
+        public void ResetAsteroid()
+        {
+            Position = new Vector2(Game1.windowSize.X / 2, Game1.windowSize.Y / 2 + (75 / 2));
+            Scale = 1;
+            Velocity = Vector2.Zero;
+            CollisionSphere = new BoundingSphere(new Vector3(Position, 0), m_txr.Width / 2);
+        }
+
+        public void ReduceSize(GameTime gt)
+        {
+           m_scale -= 0.25f * (float)gt.ElapsedGameTime.TotalSeconds;
+           m_collisionSphere = new BoundingSphere(new Vector3(m_position, 0), (m_txr.Width / 2 * m_scale));
+        }
+
+        public override void DrawMe(SpriteBatch sBatch)
+        {
+            sBatch.Draw(m_txr,
+                new Vector2(m_position.X, m_position.Y),
+                null,
+                Color.White,
+                m_rotation,
+                m_centreOfRotation,
+                m_scale,
+                SpriteEffects.None,
+                0f);
         }
     }
 
@@ -52,6 +94,7 @@ namespace AsteroidHockey
             srcRect1 = new Rectangle(0, 0, baseTexture.Width / 2, baseTexture.Height);
             srcRect2 = new Rectangle(baseTexture.Width / 2, 0, baseTexture.Width / 2, baseTexture.Height);
 
+            m_collisionSphere = new BoundingSphere(new Vector3(m_position, 0), m_txr.Width / 4);
             m_collisionSphere.Radius /= 2;
             m_centreOfRotation.X /= 2;
         }
@@ -93,6 +136,8 @@ namespace AsteroidHockey
 
     class PlayerShip : SpaceObject
     {
+        int score = 0;
+
         private Color m_tint;
 
         private Vector2 m_direction;
@@ -124,6 +169,14 @@ namespace AsteroidHockey
             get
             {
                 return m_rotation;
+            }
+        }
+
+        public int Score
+        {
+            get
+            {
+                return score;
             }
         }
 
@@ -205,6 +258,11 @@ namespace AsteroidHockey
         {
             m_thrusterInstance.Pause();
             m_shieldRunTime = m_shieldDuration;
+        }
+
+        public void AddGoal(int scoreToAdd)
+        {
+            score += scoreToAdd;
         }
 
         private void ReduceVelocity()
