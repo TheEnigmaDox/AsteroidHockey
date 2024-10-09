@@ -23,10 +23,11 @@ namespace AsteroidHockey
         Rectangle screenBounds;
 
         TextRenderer titleFont;
-        TextRenderer pressEnter;
+        TextRenderer toolTip;
         TextRenderer p1Score;
         TextRenderer p2Score;
         TextRenderer gameOver;
+        TextRenderer winnerText;
 
         StaticGraphic titleBar;
         StaticGraphic background;
@@ -90,7 +91,7 @@ namespace AsteroidHockey
             titleFont = new TextRenderer(Content.Load<SpriteFont>("Fonts/TitleFont"), 
                 new Vector2(windowSize.X / 2, 75 / 2));
 
-            pressEnter = new TextRenderer(Content.Load<SpriteFont>("Fonts/ToolTip"),
+            toolTip = new TextRenderer(Content.Load<SpriteFont>("Fonts/ToolTip"),
                 new Vector2(windowSize.X / 2, windowSize.Y - 20));
 
             titleBar = new StaticGraphic(Content.Load<Texture2D>("Textures/TitleBar"), Vector2.Zero);
@@ -131,6 +132,9 @@ namespace AsteroidHockey
 
             gameOver = new TextRenderer(Content.Load<SpriteFont>("Fonts/TitleFont"),
                 new Vector2(windowSize.X / 2, 75 / 2));
+
+            winnerText = new TextRenderer(Content.Load<SpriteFont>("Fonts/WinnerText"),
+                new Vector2(windowSize.X / 2, windowSize.Y / 2));
         }
 
         protected override void Update(GameTime gameTime)
@@ -153,7 +157,7 @@ namespace AsteroidHockey
                     UpdateGame(gameTime);
                     break;
                 case GameState.GameOver:
-                    UpdateGameOver();
+                    UpdateGameOver(gameTime, pad1_curr, pad2_curr, keyboard_Curr);
                     break;
             }
 
@@ -162,7 +166,7 @@ namespace AsteroidHockey
 
         void UpdateTitle(GameTime gameTime, GamePadState pad1, GamePadState pad2, KeyboardState keyboardState)
         {
-            pressEnter.UpdateMe(gameTime);
+            toolTip.UpdateMe(gameTime);
 
             p1Goal.UpdateMe(gameTime);
             p2Goal.UpdateMe(gameTime);
@@ -270,9 +274,18 @@ namespace AsteroidHockey
             }
         }
 
-        void UpdateGameOver()
+        void UpdateGameOver(GameTime gameTime, GamePadState pad1, GamePadState pad2, KeyboardState keyboardState)
         {
+            toolTip.UpdateMe(gameTime);
 
+            if(pad1.Buttons.A == ButtonState.Pressed ||
+                pad2.Buttons.A == ButtonState.Pressed ||
+                keyboardState.IsKeyDown(Keys.Enter))
+            {
+                p1ship.Score = 0;
+                p2ship.Score = 0;
+                gameState = GameState.Title;
+            }
         }
 
         protected override void Draw(GameTime gameTime)
@@ -326,7 +339,7 @@ namespace AsteroidHockey
 
             asteroid.DrawMe(_spriteBatch);
 
-            pressEnter.DrawString(_spriteBatch, "Press Enter/A to start!");
+            toolTip.DrawString(_spriteBatch, "Press Enter/A to start!");
         }
 
         void DrawGame(GameTime gameTime)
@@ -351,6 +364,17 @@ namespace AsteroidHockey
             background.DrawMe(_spriteBatch);
 
             gameOver.DrawString(_spriteBatch, "GAME OVER!");
+
+            if(p1ship.Score > p2ship.Score)
+            {
+                winnerText.DrawString(_spriteBatch, "Player 1 Wins!");
+            }
+            else
+            {
+                winnerText.DrawString(_spriteBatch, "Player 2 Wins!");
+            }
+
+            toolTip.DrawString(_spriteBatch, "Press Enter/A to return to title");
         }
     }
 }

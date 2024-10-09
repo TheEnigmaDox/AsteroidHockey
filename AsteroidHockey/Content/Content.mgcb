@@ -53,6 +53,13 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/ToolTip.spritefont
 
+#begin Fonts/WinnerText.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/WinnerText.spritefont
+
 #begin Textures/asteroid.png
 /importer:TextureImporter
 /processor:TextureProcessor

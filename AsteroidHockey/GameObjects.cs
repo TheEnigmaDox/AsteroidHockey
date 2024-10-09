@@ -178,6 +178,11 @@ namespace AsteroidHockey
             {
                 return score;
             }
+
+            set
+            {
+                score = value;
+            }
         }
 
         public PlayerShip(Texture2D txrImage, Texture2D txrDirection, Texture2D txrShield, Vector2 position, float mass, Color tint,
