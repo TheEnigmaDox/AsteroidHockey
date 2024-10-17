@@ -10,7 +10,18 @@ namespace AsteroidHockey
 {
     class Asteroid : SpaceObject
     {
-        float m_scale = 1;
+        private float m_scale = 1;
+
+        SoundEffect m_warpSound;
+        SoundEffectInstance m_warpInstance;
+
+        public SoundEffectInstance WarpInstance
+        {
+            get 
+            { 
+                return m_warpInstance; 
+            }
+        }
 
         public float Scale
         {
@@ -27,10 +38,13 @@ namespace AsteroidHockey
 
         private Vector2 m_maxVelocity = new Vector2(250, 250);
 
-        public Asteroid(Texture2D txr, Vector2 pos, float rotSpeed, Vector2 startingSpeed, float mass)
+        public Asteroid(Texture2D txr, Vector2 pos, float rotSpeed, Vector2 startingSpeed, float mass, SoundEffect warpSound)
             : base(txr, pos, rotSpeed, startingSpeed, mass)
-        { 
-            
+        {
+            m_warpSound = warpSound;
+            m_warpInstance = m_warpSound.CreateInstance();
+
+            m_warpInstance.Volume = 0.25f;
         }
 
         public void UpdateMe(GameTime gt, Rectangle sBounds)
@@ -38,7 +52,6 @@ namespace AsteroidHockey
             Position += Velocity * (float)gt.ElapsedGameTime.TotalSeconds;
 
             m_rotation = (m_rotation + m_rotationSpeed) % MathHelper.TwoPi;
-
 
             if (Position.X + m_txr.Width / 2 >= sBounds.Width || Position.X - m_txr.Width / 2 <= 0)
             {
@@ -54,6 +67,7 @@ namespace AsteroidHockey
 
         public void ResetAsteroid()
         {
+            m_warpInstance.Stop();
             Position = new Vector2(Game1.windowSize.X / 2, Game1.windowSize.Y / 2 + (75 / 2));
             Scale = 1;
             Velocity = Vector2.Zero;
@@ -136,7 +150,10 @@ namespace AsteroidHockey
 
     class PlayerShip : SpaceObject
     {
-        int score = 0;
+        int m_score = 0;
+
+        private bool m_shipCollision = false;
+        private bool m_asteroidCollision = false;
 
         private Color m_tint;
 
@@ -155,8 +172,10 @@ namespace AsteroidHockey
 
         SoundEffect m_shipThruster;
         SoundEffect m_shieldSFX;
+        SoundEffect m_explosionSFX;
         SoundEffectInstance m_thrusterInstance;
         SoundEffectInstance m_shieldInstance;
+        SoundEffectInstance m_explosionInstance;
 
         public float Rotation
         {
@@ -176,17 +195,34 @@ namespace AsteroidHockey
         {
             get
             {
-                return score;
+                return m_score;
             }
 
             set
             {
-                score = value;
+                m_score = value;
             }
         }
 
+        public bool ShipCollision
+        {
+            set
+            {
+                m_shipCollision = value;
+            }
+        }
+
+        public bool AsteroidCollision
+        {
+            set
+            {
+                m_asteroidCollision = value;
+            }
+        }
+
+
         public PlayerShip(Texture2D txrImage, Texture2D txrDirection, Texture2D txrShield, Vector2 position, float mass, Color tint,
-            float thrust, float inertia, SoundEffect shipThruster, SoundEffect shieldSFX)
+            float thrust, float inertia, SoundEffect shipThruster, SoundEffect shieldSFX, SoundEffect explosionSFX)
             : base(txrImage, position, 0.1f, Vector2.Zero, mass)
         {
             m_tint = tint;
@@ -197,7 +233,6 @@ namespace AsteroidHockey
             m_inertia = inertia;
 
             m_shipThruster = shipThruster;
-
             m_thrusterInstance = m_shipThruster.CreateInstance();
 
             m_txrDirection = txrDirection;
@@ -209,13 +244,19 @@ namespace AsteroidHockey
 
             m_shieldSFX = shieldSFX;
             m_shieldInstance = m_shieldSFX.CreateInstance();    
+
+            m_explosionSFX = explosionSFX;
+            m_explosionInstance = m_explosionSFX.CreateInstance();
+
+            m_thrusterInstance.Volume = 0.5f;
+            m_shieldInstance.Volume = 0.25f;
         }
 
-        public void UpdateMe(GameTime gt, GamePadState pad1)
+        public void UpdateMe(GameTime gt, GamePadState pad)
         {
             m_thrusterInstance.Play();
 
-            m_rotation += m_rotationSpeed * pad1.ThumbSticks.Left.X;
+            m_rotation += m_rotationSpeed * pad.ThumbSticks.Left.X;
 
             m_direction.X = (float)Math.Cos(m_rotation); 
             m_direction.Y = (float)Math.Sin(m_rotation);
@@ -223,21 +264,34 @@ namespace AsteroidHockey
             if (m_shieldRunTime > 0)
             {
                 m_shieldRunTime--;
-                m_shieldInstance.Play();
+
+                if (m_asteroidCollision)
+                {
+                    m_explosionInstance.Play();
+                }
+                else if(m_shipCollision)
+                {
+                    m_shieldInstance.Play();
+                }
             }
             else
             {
-                Velocity += (m_direction * m_thrust) * (pad1.Triggers.Right * 20);
-                Velocity += (m_direction * -m_thrust) * (pad1.Triggers.Left * 20);
+                m_shipCollision = false;
+                m_asteroidCollision = false;
+
+                m_explosionInstance.Stop();
+                m_shieldInstance.Stop();
+
+                Velocity += (m_direction * m_thrust) * (pad.Triggers.Right * 20);
+                Velocity += (m_direction * -m_thrust) * (pad.Triggers.Left * 20);
                 m_shieldInstance.Pause();
             }
-
             Position += Velocity * (float)gt.ElapsedGameTime.TotalSeconds;
 
             Velocity *= m_inertia;
             ReduceVelocity();
 
-            if(pad1.Triggers.Right == 0 && pad1.Triggers.Left == 0)
+            if(pad.Triggers.Right == 0 && pad.Triggers.Left == 0)
             {
                 m_thrusterInstance.Pause();
             }
@@ -246,14 +300,14 @@ namespace AsteroidHockey
                 m_thrusterInstance.Play();
             }
 
-            if(pad1.Buttons.LeftShoulder == ButtonState.Pressed)
+            if(pad.Buttons.LeftShoulder == ButtonState.Pressed)
             {
                 m_rotation = 0;
                 Position = new Vector2(100, 300);
                 Velocity = Vector2.Zero;
             }
 
-            if (pad1.Buttons.RightShoulder == ButtonState.Pressed)
+            if (pad.Buttons.RightShoulder == ButtonState.Pressed)
             {
                 ShieldsUp();
             }
@@ -267,7 +321,7 @@ namespace AsteroidHockey
 
         public void AddGoal(int scoreToAdd)
         {
-            score += scoreToAdd;
+            m_score += scoreToAdd;
         }
 
         private void ReduceVelocity()

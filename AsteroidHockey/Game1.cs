@@ -29,6 +29,7 @@ namespace AsteroidHockey
         TextRenderer timerText;
         TextRenderer gameOver;
         TextRenderer winnerText;
+        TextRenderer respawnTimer;
 
         StaticGraphic titleBar;
         StaticGraphic background;
@@ -104,7 +105,8 @@ namespace AsteroidHockey
             background = new StaticGraphic(Content.Load<Texture2D>("Textures/stars800"), new Vector2(0, 75));
             asteroid = new Asteroid(Content.Load<Texture2D>("Textures/asteroid"),
                 new Vector2(windowSize.X / 2, windowSize.Y / 2 + (75 / 2)),
-                -0.002f, Vector2.Zero, 20);
+                -0.002f, Vector2.Zero, 20,
+                Content.Load<SoundEffect>("Audio/WarpSound"));
 
             p1Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(100, 375), 0.02f);
             p2Goal = new BlackHole(Content.Load<Texture2D>("Textures/warp"), new Vector2(700, 375), 0.02f);
@@ -115,7 +117,8 @@ namespace AsteroidHockey
                 p1Goal.Position, 10, Color.Red,
                 0.2f, 0.97f,
                 Content.Load<SoundEffect>("Audio/thrusterFire"),
-                Content.Load<SoundEffect>("Audio/forceField"));
+                Content.Load<SoundEffect>("Audio/forceField"),
+                Content.Load<SoundEffect>("Audio/LowFrequencyExplosion"));
 
             p2ship = new PlayerShip(Content.Load<Texture2D>("Textures/falcon"),
                 Content.Load<Texture2D>("Textures/direction"),
@@ -124,7 +127,8 @@ namespace AsteroidHockey
                 10, Color.Yellow,
                 0.2f, 0.97f,
                 Content.Load<SoundEffect>("Audio/thrusterFire"),
-                Content.Load<SoundEffect>("Audio/forceField"));
+                Content.Load<SoundEffect>("Audio/forceField"),
+                Content.Load<SoundEffect>("Audio/LowFrequencyExplosion"));
 
             p2ship.Rotation = (float)Math.PI;
 
@@ -141,6 +145,9 @@ namespace AsteroidHockey
                 new Vector2(windowSize.X / 2, 75 / 2));
 
             winnerText = new TextRenderer(Content.Load<SpriteFont>("Fonts/WinnerText"),
+                new Vector2(windowSize.X / 2, windowSize.Y / 2));
+
+            respawnTimer = new TextRenderer(Content.Load<SpriteFont>("Fonts/ToolTip"),
                 new Vector2(windowSize.X / 2, windowSize.Y / 2));
         }
 
@@ -215,6 +222,7 @@ namespace AsteroidHockey
                     ref asteroid.Velocity, ref p1ship.Velocity,
                     asteroid.Mass, p1ship.Mass);
 
+                p1ship.AsteroidCollision = true;
                 p1ship.ShieldsUp();
             }
 
@@ -227,6 +235,7 @@ namespace AsteroidHockey
                     ref asteroid.Velocity, ref p2ship.Velocity,
                     asteroid.Mass, p2ship.Mass);
 
+                p2ship.AsteroidCollision = true;
                 p2ship.ShieldsUp();
             }
 
@@ -239,6 +248,9 @@ namespace AsteroidHockey
                     ref p1ship.Velocity, ref p2ship.Velocity,
                     p1ship.Mass, p2ship.Mass);
 
+                p1ship.ShipCollision = true;
+                p2ship.ShipCollision = true;
+
                 p1ship.ShieldsUp();
                 p2ship.ShieldsUp();
             }
@@ -247,10 +259,15 @@ namespace AsteroidHockey
             {
                 asteroid.ReduceSize(gameTime);
 
+                asteroid.WarpInstance.Play();
+
                 if(asteroid.Scale < 0.5f)
                 {
                     asteroid.ResetAsteroid();
-                    
+
+                    p1Goal.Position = new Vector2(100, rng.Next(75 + p1Goal.Texture.Height / 2, windowSize.Y - p1Goal.Texture.Height / 2));
+                    p2Goal.Position = new Vector2(700, rng.Next(75 + p2Goal.Texture.Height / 2, windowSize.Y - p2Goal.Texture.Height / 2));
+
                     p1ship.Position = p1Goal.Position;
                     p2ship.Position = p2Goal.Position;
                     p2ship.AddGoal(1);
@@ -261,10 +278,15 @@ namespace AsteroidHockey
             {
                 asteroid.ReduceSize(gameTime);
 
+                asteroid.WarpInstance.Play();
+
                 if (asteroid.Scale < 0.5f)
                 {
                     asteroid.ResetAsteroid();
-                    
+
+                    p1Goal.Position = new Vector2(100, rng.Next(75 + p1Goal.Texture.Height / 2, windowSize.Y - p1Goal.Texture.Height / 2));
+                    p2Goal.Position = new Vector2(700, rng.Next(75 + p2Goal.Texture.Height / 2, windowSize.Y - p2Goal.Texture.Height / 2));
+
                     p1ship.Position = p1Goal.Position;
                     p2ship.Position = p2Goal.Position;
                     p1ship.AddGoal(1);

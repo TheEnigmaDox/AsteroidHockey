@@ -19,11 +19,23 @@
 /processorParam:Quality=Best
 /build:Audio/forceField.wav
 
+#begin Audio/LowFrequencyExplosion.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/LowFrequencyExplosion.wav
+
 #begin Audio/thrusterFire.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Audio/thrusterFire.wav
+
+#begin Audio/WarpSound.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/WarpSound.wav
 
 #begin Fonts/Arial07.spritefont
 /importer:FontDescriptionImporter
