@@ -298,11 +298,11 @@ namespace AsteroidHockey
                 gameState = GameState.GameOver;
             }
 
-            if (p1ship.Score == 5)
+            if (p1ship.Score == 2)
             {
                 gameState = GameState.GameOver;
             }
-            else if (p2ship.Score == 5)
+            else if (p2ship.Score == 2)
             {
                 gameState = GameState.GameOver;
             }
